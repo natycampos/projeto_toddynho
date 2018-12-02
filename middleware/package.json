@@ -1,0 +1,16 @@
+{
+  "name": "middleware",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql": "^2.16.0",
+    "restify": "^7.2.3",
+    "restify-cors-middleware": "^1.1.1"
+  }
+}

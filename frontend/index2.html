@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+	<title>Toddynho</title>
+	
+	<!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+
+</head>
+<body>
+
+	<nav class="navbar navbar-dark bg-info">
+			<span class="navbar-brand mb-0 h1">Toddynho</span>
+	</nav>
+
+	<br>
+
+	<center>
+		<div class="">
+
+			<select id="lote">
+				<option value="">Selecione...</option>
+			</select>
+			<button class="btn btn-dark  btn-sm" id="botao">Mostrar/Ocultar dados</button>
+			
+			<div style="height: 10px"></div>
+			
+			<table id="tabela" border="1px">
+				<thead>
+					<th>ID</th>
+					<th>Lote</th>
+					<th>Conteúdo</th>
+					<th>Validade</th>
+				</thead>
+				<tbody>
+
+				</tbody>
+			</table>
+
+		</div>
+	</center>
+	
+	<br><br><br><br>
+
+	<div class="card">
+
+		<center>
+			<h5>Cadastrar novos produtos:<h5>
+		</center>
+
+		<center>
+			<form class="col-lg-9">
+
+				<div class="form-group row">
+					<label>Lote:  </label>
+					<div class="form-group">
+						<select id="lote_input">
+							<option value="">Selecione</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="">Conteudo: </label>
+					<input type="number" class="form-control" id="in_campo2" placeholder="Apenas números">
+				</div>
+
+				<div class="form-group">
+					<label for="">Validade: </label>
+					<input type="date" class="form-control" id="in_campo3">
+				</div>
+				
+				<button type="button" class="btn btn-dark" id="botao_cadastrar" onclick="inserir()">Cadastrar</button>
+			</form>
+		</center>
+	</div>
+    
+    
+    <!-- Jquery -->
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    
+</body>
+</html>
+
+<script>
+    var mid = 'http://localhost:5000/toddy/';
+
+	$(document).ready(function() {
+		$.ajax({
+			url: mid + 'buscarLotes',
+			type: 'GET',
+			success: function(result) {
+				$.each(result, function(indice, toddy) {
+					$("#lote").append(`<option value="`+toddy.lote+`">Lote: `+toddy.lote+`</option>`);
+					$("#lote_input").append(`<option value="` + toddy.lote + `">Lote: ` + toddy.lote + `</option>`);
+				});
+			},
+			error: function() {
+				alert('Erro na requisição Ajax - buscarLotes.');
+			}
+		})
+	});
+
+    $("#lote").change(function() {
+		$("#tabela > tbody").empty(); // Limpando a lista
+
+		var lote = this.value;
+		
+		$("#lote").attr("disabled", true); // Desabilitando o combo box
+		$.ajax({
+			url: mid + 'buscarPorLote?lote=' + lote,
+			type: 'GET',
+			success: function(result) {
+				$.each(result, function(indice, toddy) {
+					$("#tabela > tbody").append(`<tr>`
+						+`<td>ID: `+ toddy.id + `</td>`
+						+`<td>Lote: `+ toddy.lote + `</td>`
+						+`<td>Conteúdo: `+ toddy.conteudo + `</td>`
+						+`<td>Validade: `+ toddy.validade + `</td>`
+						+`</tr>`);
+				});
+			},
+			error: function() {
+				alert('Erro na requisição Ajax - buscarPorLotes.');
+			},
+			complete: function() {
+				$("#lote").attr("disabled", false); //Habilitando o combo box
+			}
+		})
+	});
+
+	$("#botao").click(
+		function () {
+			//Toggle => exibe ou oculta o tbody
+			$("#tabela > tbody").toggle();
+		}
+	);
+
+	$("#botao_cadastrar").click(
+		function () {
+			let loteValue = $('#lote_input').val();
+			let conteudoValue = $('#in_campo2').val();
+			let auxDate = ($('#in_campo3').val()).split("-");
+			let validadeValue = `${auxDate[2]}/${auxDate[1]-1}/${auxDate[0]}`;
+
+			console.log(loteValue);
+			console.log(conteudoValue);
+			console.log(validadeValue);
+
+			let body = {
+				lote: loteValue,
+   				conteudo: conteudoValue,
+    			validade: validadeValue
+			}
+
+			$.ajax({
+				url: mid + 'inserir',
+				type: 'POST',
+				data: body,
+				success: function (result) {
+					alert('Cadastrado.');
+					$('#lote_input').val('');;
+					$('#in_campo2').val('');;
+					$('#in_campo3').val('');;
+				},
+				error: function () {
+					alert('Erro na requisição Ajax - cadastrar');
+				},
+				complete: function () {
+					
+				}
+			})
+		}
+	);
+
+
+</script>
+

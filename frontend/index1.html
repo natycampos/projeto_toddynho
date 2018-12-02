@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Toddynho</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+</head>
+<body>
+
+    <!-- Navbar -->
+	<!-- <nav>
+        <div class="nav-wrapper blue darken-3">
+            <div class="center">
+                <h3>TODDYNHO</h3>
+            </div>
+        </div>
+    </nav> -->
+
+    <div class="col-lg-9">
+
+        <div class="mx-auto">
+
+            <center>
+                <h5>Tabela dos produtos<h5></h5>
+            </center>
+
+            <form class="col-lg-9">
+
+                <div class="form-group">
+                    <label for="">Selecione o lote</label>
+                    <select id="lote" class="form-control">
+                        <option>Selecione</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-dark" id="botao_dados">Mostrar/Ocultar dados</button>
+
+            </form>
+            
+            
+            <div>
+                <table id="tabela"  class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Lote</th>
+                            <th scope="col">Conteudo</th>
+                            <th scope="col">Validade</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                       <!--  <tr>
+                            <td>ID</td>
+                            <td>Lote</td>
+                            <td>Conteudo</td>
+                            <td>Validade</td>
+                        </tr> -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div> <!-- Fim card listar tudo -->
+
+        <div class="card">
+
+            <center>
+                <h5>Cadastrar novos produtos:<h5>
+            </center>
+
+            <center>
+
+                <form class="col-lg-9">
+
+                    <div class="form-group">
+                        <label for="">Conteudo</label>
+                        <input type="number" class="form-control" id="toddy_conteudo" placeholder="Apenas números">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="">Validade</label>
+                        <input type="date" class="form-control" id="toddy_validade">
+                    </div>
+                    
+                    <button type="button" class="btn btn-dark" id="botao_cadastrar" onclick="inserir()">Cadastrar</button>
+                </form>
+            </center>
+
+            <!-- <div class="form-group">
+                    <div class="col s12">
+                        <input type="text" class="form-control" placeholder="Campo1" id="campo1" />
+                    </div>
+        
+                    <div class="col s12">
+                        <input type="text" class="form-control" placeholder="Campo2" id="campo2" />
+                    </div>
+        
+                    <div class=" col s12">
+                        <input type="text" class="form-control" placeholder="Campo3" id="campo3" />
+                    </div>
+        
+                    <center>
+                        <br>
+                        <button type="button" class="btn btn-dark" id="botao_cadastrar" onclick="inserir()">Cadastrar</button>
+                    </center>
+                
+            </div> -->
+        </div>
+
+        <div class="card col s12">
+
+            <div class="center">
+                <h5>Excluir por id:<h5>
+            </div>
+
+            
+            <div class="center">
+
+                <div class="col s12">
+                    <input type="text" class="form-control" placeholder="Id" id="id_toddy" />
+                </div>
+    
+                <div style="padding: 24px;">
+                    <a class="waves-effect waves-light btn blue darken-3" onclick="excluir()">Excluir</a>
+                </div>
+              
+            </div>
+
+        </div>
+
+    </div>
+    
+    
+    <!-- Jquery -->
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+
+</body>
+</html>
+
+<script>
+    
+    var mid = 'http://localhost:5000/toddy/';
+
+    $(document).ready(function() {
+        $.ajax({
+			url: mid + 'buscarLotes',
+			type: 'GET',
+			success: function (result) {
+				$.each(result, function (indice, toddy) {
+					$("#lote").append(`<option value="` + toddy.lote + `">Lote: ` + toddy.lote + `</option>`);
+					$("#lote_input").append(`<option value="` + toddy.lote + `">Lote: ` + toddy.lote + `</option>`);
+				});
+			},
+			error: function () {
+				alert('Houve um erro.');
+			}
+		})
+    });
+
+
+    $("#lote").change(function() {
+		$("#tabela > tbody").empty(); // Limpando a lista
+
+		var lote = this.value;
+		
+		$("#lote").attr("disabled", true); // Desabilitando o combo box
+		$.ajax({
+			url: mid + 'buscarPorLote?lote=' + lote,
+			type: 'GET',
+			success: function(result) {
+				$.each(result, function(indice, toddy) {
+					$("#tabela > tbody").append(`<tr>`
+						+`<td>ID: `+ toddy.id + `</td>`
+						+`<td>Lote: `+ toddy.lote + `</td>`
+						+`<td>Conteúdo: `+ toddy.conteudo + `</td>`
+						+`<td>Validade: `+ toddy.validade + `</td>`
+						+`</tr>`);
+				});
+			},
+			error: function() {
+				alert('Erro na requisição Ajax - buscarPorLotes.');
+			},
+			complete: function() {
+				$("#lote").attr("disabled", false); //Habilitando o combo box
+			}
+		})
+	});
+
+    function inserir(){
+
+        var dados = $('#cadastro').serialize();
+
+        $.ajax({
+            url: mid + 'inserir',
+            type: "POST",
+            dataType: 'jsonp',
+            data: dados,
+            success: function(data) {
+                alert("Certo!"); //remover
+            },
+            error: function (data) {
+                alert("Erro na requisição Ajax.");
+            }
+        });
+    }
+
+    function excluir(){
+
+        $.ajax({
+            url: mid + 'excluir',
+            type: "POST",
+            // dataType: 'jsonp',
+            data: {
+                id: id_toddy
+            },
+            success: function(data) {
+                alert("Excluir!"); //remover
+            },
+            error: function (data) {
+                alert("Erro na requisição Ajax - excluir.");
+            }
+        });
+    }
+
+</script>
+
